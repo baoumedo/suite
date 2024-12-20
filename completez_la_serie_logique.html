@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complétez la série logique</title>
+    <style>
+        /* GLOBAL STYLES */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        #timer {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .sequence {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sequence div, .choices div {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: white;
+        }
+
+        .empty {
+            background: #f0f0f0;
+            border-style: dashed;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #333;
+            background-color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #eee;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .sequence, .choices {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .sequence div, .choices div {
+                width: 50px;
+                height: 50px;
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Complétez la série logique</h1>
+    <div id="timer">Temps restant : 60s</div>
+
+    <!-- Conteneur principal -->
+    <div class="container">
+        <div class="sequence">
+            <div>3</div>
+            <div>6</div>
+            <div>12</div>
+            <div>24</div>
+            <div class="empty" data-answer="48"></div>
+            <div class="empty" data-answer="96"></div>
+            <div>192</div>
+        </div>
+
+        <div class="choices">
+            <div draggable="true">48</div>
+            <div draggable="true">96</div>
+            <div draggable="true">72</div>
+            <div draggable="true">36</div>
+            <div draggable="true">144</div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button id="reset">Réinitialiser</button>
+        <button id="submit">Valider</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        const choices = document.querySelectorAll(".choices div");
+        const empties = document.querySelectorAll(".empty");
+        const result = document.getElementById("result");
+        const timer = document.getElementById("timer");
+        let timeRemaining = 60, draggedItem = null;
+
+        // Timer
+        const countdown = setInterval(() => {
+            if (--timeRemaining <= 0) {
+                clearInterval(countdown);
+                timer.textContent = "Temps écoulé !";
+            } else {
+                timer.textContent = `Temps restant : ${timeRemaining}s`;
+            }
+        }, 1000);
+
+        // Drag & Drop
+        choices.forEach(choice => {
+            choice.ondragstart = e => (draggedItem = e.target, e.dataTransfer.setData("text", e.target.textContent));
+            choice.ondragend = () => (draggedItem.style.display = "block");
+        });
+
+        empties.forEach(empty => {
+            empty.ondragover = e => e.preventDefault();
+            empty.ondrop = () => {
+                if (!empty.textContent) {
+                    empty.textContent = draggedItem.textContent;
+                    empty.style.backgroundColor = "#ff6b6b";
+                }
+            };
+        });
+
+        // Validation
+        document.getElementById("submit").onclick = () => {
+            const correct = Array.from(empties).every(e => e.textContent === e.dataset.answer);
+            result.textContent = correct ? "Bravo ! Série correcte." : "Erreur, essayez encore.";
+            result.style.color = correct ? "green" : "red";
+        };
+
+        // Reset
+        document.getElementById("reset").onclick = () => {
+            empties.forEach(e => (e.textContent = "", e.style.backgroundColor = ""));
+            result.textContent = "";
+            timeRemaining = 60;
+            timer.textContent = `Temps restant : 60s`;
+        };
+    </script>
+</body>
+</html>
